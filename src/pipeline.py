@@ -173,10 +173,6 @@ class AnalysisPipeline:
         t_start = time.time()
         print(f"[Pipeline] Analyzing '{exercise_name}' from: {video_path}")
 
-        reference = self.store.load(exercise_name)
-        print(f"[Pipeline] Loaded reference: {reference.name} "
-              f"({reference.time_series.num_frames} frames)")
-
         user_ts = self._process_video(video_path)
 
         if user_ts.num_frames < 5:
@@ -187,6 +183,12 @@ class AnalysisPipeline:
 
         print(f"[Pipeline] User sequence: {user_ts.num_frames} frames, "
               f"{user_ts.duration_seconds:.1f}s")
+
+        # Auto-select the best-matching reference variant (handles multiple
+        # references per exercise at different angles / technique styles).
+        reference = self.store.find_best_match(user_ts, exercise_name)
+        print(f"[Pipeline] Using reference: '{reference.name}' "
+              f"({reference.time_series.num_frames} frames)")
 
         # ── Rep-aware comparison ──────────────────────────────────────────────
         rep_result = self.rep_comparator.compare(user_ts, reference.time_series)
