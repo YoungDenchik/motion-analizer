@@ -148,7 +148,11 @@ class DTWComparator:
         def weighted_distance(a: np.ndarray, b: np.ndarray) -> float:
             return float(np.sum(weights * np.abs(a - b)))
 
-        distance, path = fastdtw(q_data, r_data, radius=self.radius, dist=weighted_distance)
+        # Scale the band radius with the longer sequence so the warp path
+        # stays valid at any length ratio (e.g. 40-frame user vs 80-frame ref).
+        # 15% of the longer sequence, floored at the configured minimum.
+        effective_radius = max(self.radius, int(0.15 * max(len(q_data), len(r_data))))
+        distance, path = fastdtw(q_data, r_data, radius=effective_radius, dist=weighted_distance)
 
         # Compute per-frame deviations aligned to the query
         # Each query frame maps to one (or more) reference frames via the path.
