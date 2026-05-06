@@ -1,0 +1,56 @@
+services:
+
+  # ── FastAPI + Python pipeline ───────────────────────────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    image: ai-fitness-coach/backend:latest
+
+    volumes:
+      # Reference exercises persist across image rebuilds and restarts
+      - references_data:/app/references
+
+    restart: unless-stopped
+
+    # Resource limits: MediaPipe + OpenCV are CPU-heavy during analysis
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2G
+        reservations:
+          memory: 512M
+
+    healthcheck:
+      test:
+        - CMD
+        - wget
+        - -qO-
+        - http://localhost:8000/api/references
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s   # allow time for first-time model init
+
+    # Backend is intentionally NOT exposed on the host — only Nginx talks to it
+    expose:
+      - "8000"
+
+  # ── React + Nginx ───────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    image: ai-fitness-coach/frontend:latest
+
+    ports:
+      - "80:80"           # Change to "443:443" when adding TLS
+
+    restart: unless-stopped
+
+# ── Named volumes ───────────────────────────────────────────────────────────
+volumes:
+  references_data:
+    # References survive: docker compose down  (data is NOT deleted)
+    # To reset:  docker compose down -v

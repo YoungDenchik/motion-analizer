@@ -91,7 +91,7 @@ class VideoRenderer:
         h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
         out_path = Path(output_path)
-        writer = self._make_writer(out_path, fps, w, h)
+        writer, out_path = self._make_writer(out_path, fps, w, h)  # out_path may change to .avi
 
         # Pre-build a lookup: analysis_frame_idx → list of ErrorEvents active there
         active_at: dict[int, list[ErrorEvent]] = {}
@@ -187,7 +187,8 @@ class VideoRenderer:
         fps: float,
         w: int,
         h: int,
-    ) -> cv2.VideoWriter:
+    ) -> tuple[cv2.VideoWriter, Path]:
+        """Returns (writer, actual_output_path) — path may change to .avi on fallback."""
         path.parent.mkdir(parents=True, exist_ok=True)
         fourcc = cv2.VideoWriter_fourcc(*"mp4v")
         writer = cv2.VideoWriter(str(path), fourcc, fps, (w, h))
@@ -199,7 +200,8 @@ class VideoRenderer:
             if not writer.isOpened():
                 raise RuntimeError("Cannot open VideoWriter. Check codec availability.")
             print(f"[Renderer] mp4v unavailable, writing to {avi_path}")
-        return writer
+            return writer, avi_path
+        return writer, path
 
     @staticmethod
     def _draw_no_pose_warning(frame: np.ndarray, frame_score: float, overall: float):

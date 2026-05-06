@@ -1,0 +1,24 @@
+# ── Local development override ────────────────────────────────────────────────
+#
+# Frontend runs in Docker (Nginx), backend runs locally with Python.
+#
+#   Terminal 1 — backend (local):
+#       .venv\Scripts\activate
+#       python api.py
+#
+#   Terminal 2 — frontend (Docker):
+#       docker compose up frontend --build
+#       open http://localhost
+#
+# How it works:
+#   extra_hosts maps the name "backend" → the host machine IP so Nginx can
+#   reach the locally-running FastAPI on port 8000.
+#   The nginx.conf proxy_pass http://backend:8000 works without any changes.
+
+services:
+
+  frontend:
+    ports:
+      - "80:80"
+    extra_hosts:
+      - "backend:host-gateway"   # "backend" resolves to the host machine

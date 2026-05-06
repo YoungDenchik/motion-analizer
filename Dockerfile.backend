@@ -1,0 +1,59 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# AI Fitness Coach — Backend
+#
+# Python 3.11-slim + MediaPipe + FastAPI + OpenCV (headless)
+#
+# Layers ordered coarse → fine so Docker cache is maximally reused:
+#   1. system libs (rarely change)
+#   2. Python deps   (change when requirements.txt changes)
+#   3. model file    (30 MB, downloaded once, baked in)
+#   4. source code   (changes most often)
+# ─────────────────────────────────────────────────────────────────────────────
+FROM python:3.11-slim AS base
+
+WORKDIR /app
+
+# ── System libraries ──────────────────────────────────────────────────────────
+# MediaPipe needs libGL / libgomp; OpenCV headless still needs libglib2.0
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        libgl1 \
+        libglib2.0-0 \
+        libgomp1 \
+        libsm6 \
+        libxext6 \
+        libxrender1 \
+        wget \
+        ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
+
+# ── Python dependencies ───────────────────────────────────────────────────────
+COPY requirements.txt .
+
+# Install everything, then swap opencv-python (needs a display) for the
+# server-safe headless variant. The || true prevents failure if already absent.
+RUN pip install --no-cache-dir -r requirements.txt \
+    && pip install --no-cache-dir opencv-python-headless \
+    && pip uninstall -y opencv-python 2>/dev/null || true
+
+# ── MediaPipe pose landmarker model (~30 MB) ──────────────────────────────────
+# Baked into the image so every container start is instant (no download needed).
+# The detector resolves this relative to the repo root = WORKDIR = /app.
+RUN wget -q --show-progress -O pose_landmarker_full.task \
+    "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/latest/pose_landmarker_full.task"
+
+# ── Application source ────────────────────────────────────────────────────────
+COPY src/ ./src/
+COPY api.py .
+
+# References directory — intended to be overridden by a Docker volume.
+RUN mkdir -p references
+
+# ── Runtime ───────────────────────────────────────────────────────────────────
+EXPOSE 8000
+
+# workers=1: the pipeline holds large model state in memory; multiple workers
+# would duplicate it. Scale horizontally with multiple replicas instead.
+CMD ["python", "-m", "uvicorn", "api:app", \
+     "--host", "0.0.0.0", \
+     "--port", "8000", \
+     "--workers", "1"]
