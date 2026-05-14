@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(.venv/Scripts/pip list *)",
+      "Bash(.venv\\\\Scripts\\\\python -c \"import pptx; print\\(pptx.__version__\\)\")",
+      "Bash(.venv\\\\Scripts\\\\python.exe -c \"import pptx; print\\(pptx.__version__\\)\")",
+      "PowerShell(& \"d:\\\\ai_trainer\\\\.venv\\\\Scripts\\\\python.exe\" -c \"import pptx; print\\(pptx.__version__\\)\" 2>&1)",
+      "PowerShell(& \"d:\\\\ai_trainer\\\\.venv\\\\Scripts\\\\pip.exe\" install python-pptx --quiet)",
+      "PowerShell(& \"d:\\\\ai_trainer\\\\.venv\\\\Scripts\\\\python.exe\" \"d:\\\\ai_trainer\\\\generate_pptx.py\" 2>&1)",
+      "PowerShell(Get-ChildItem -Path \"d:\\\\ai_trainer\" -Force | Select-Object Name, @{Name=\"Type\"; Expression={if\\($_.PSIsContainer\\){\"Directory\"}else{\"File\"}}} | Sort-Object Name)",
+      "PowerShell(Get-Command node, npm -ErrorAction SilentlyContinue)",
+      "PowerShell(& \"d:\\\\ai_trainer\\\\.venv\\\\Scripts\\\\python.exe\" -c \"import fastapi, uvicorn, multipart; print\\('fastapi', fastapi.__version__\\); print\\('uvicorn', uvicorn.__version__\\)\")",
+      "PowerShell(docker compose -f \"d:\\\\ai_trainer\\\\docker-compose.yml\" config --quiet 2>&1)",
+      "PowerShell(docker --version 2>&1)"
+    ]
+  }
+}

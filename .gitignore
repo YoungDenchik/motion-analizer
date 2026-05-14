@@ -39,12 +39,14 @@ Thumbs.db
 test_overlay.png
 annotated_output.mp4
 
-
+# Data / references
 data/
 claude/
+references/
 
-
-*.task
-*.mp4
-*.MP4
-*.json
+# ── Mobile (React Native / Expo) ────────────────────────────────────────────
+mobile/node_modules/
+mobile/.expo/
+mobile/dist/
+mobile/.env.local
+mobile/.env*.local

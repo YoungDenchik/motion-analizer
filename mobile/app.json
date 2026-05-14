@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "AI Fitness Coach",
+    "slug": "ai-trainer-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Allow AI Fitness Coach to access your photo library to select exercise videos.",
+        "NSCameraUsageDescription": "Allow AI Fitness Coach to record exercise videos.",
+        "NSMicrophoneUsageDescription": "Allow AI Fitness Coach to record audio with video."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0F0F0F"
+      }
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow AI Fitness Coach to access your photos to select exercise videos.",
+          "cameraPermission": "Allow AI Fitness Coach to record exercise videos."
+        }
+      ]
+    ]
+  }
+}

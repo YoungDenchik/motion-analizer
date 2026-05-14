@@ -5,7 +5,7 @@ import {
   Clock, Layers, TrendingUp, Gauge, Film,
 } from 'lucide-react'
 import { api } from '../api'
-import VideoDropzone from '../components/VideoDropzone'
+import VideoInput from '../components/VideoInput'
 import ScoreGauge    from '../components/ScoreGauge'
 import RepChart      from '../components/RepChart'
 import FeedbackPanel from '../components/FeedbackPanel'
@@ -96,7 +96,7 @@ export default function Analyze() {
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 mb-6 space-y-5">
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">Workout Video</label>
-            <VideoDropzone onFile={setVideoFile} label="Drop your workout video here" />
+            <VideoInput onFile={setVideoFile} label="Drop your workout video here" />
           </div>
 
           <div>

@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(.venv/Scripts/python main.py demo)",
+      "Bash(.venv/Scripts/python -c ' *)",
+      "Bash(.venv/Scripts/python -c \"from src.visualization.overlay import FrameAnnotator; print\\('OK'\\)\")",
+      "Bash(.venv/Scripts/python main.py analyze squat --video \"data\\\\video_sq_ex.MP4\")",
+      "Bash(.venv\\\\Scripts\\\\python.exe main.py demo)"
+    ]
+  }
+}

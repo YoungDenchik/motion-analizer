@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { CheckCircle, Loader2, AlertCircle, RotateCcw, Info } from 'lucide-react'
 import { api } from '../api'
-import VideoDropzone from '../components/VideoDropzone'
+import VideoInput from '../components/VideoInput'
 
 export default function Record() {
   const [name,      setName]      = useState('')
@@ -121,7 +121,7 @@ export default function Record() {
           <label className="block text-sm font-medium text-slate-300 mb-2">
             Reference Video <span className="text-red-400">*</span>
           </label>
-          <VideoDropzone onFile={setVideoFile} label="Drop reference video here" />
+          <VideoInput onFile={setVideoFile} label="Drop reference video here" />
         </div>
 
         {/* Overwrite */}
