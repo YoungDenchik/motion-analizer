@@ -8,7 +8,7 @@ import { useAuthStore } from '../../store/authStore';
 import { useExercises } from '../../hooks/useExercises';
 
 export const HomeScreen: React.FC = () => {
-  const userName = useAuthStore((s) => s.userName);
+  const user = useAuthStore((s) => s.user);
   const { exercises, loading, fetch } = useExercises();
   const navigation = useNavigation<any>();
 
@@ -35,7 +35,7 @@ export const HomeScreen: React.FC = () => {
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <Text style={styles.greeting}>Hello, {userName} 👋</Text>
+          <Text style={styles.greeting}>Hello, {user?.username ?? 'there'} 👋</Text>
           <Text style={styles.subtitle}>Ready to analyze your workout?</Text>
         </View>
 

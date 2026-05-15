@@ -1,51 +1,38 @@
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-  Alert,
+  View, Text, TextInput, StyleSheet, ScrollView,
+  KeyboardAvoidingView, Platform, Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS, SPACING, FONT_SIZE, BORDER_RADIUS } from '../../constants';
 import { Button } from '../../components/common/Button';
 import { useAuthStore } from '../../store/authStore';
 import { api } from '../../api/endpoints';
-import type { SetupScreenProps } from '../../types/navigation';
+import type { ServerConfigScreenProps } from '../../types/navigation';
 
-export const SetupScreen: React.FC<SetupScreenProps> = () => {
+export const ServerConfigScreen: React.FC<ServerConfigScreenProps> = ({ navigation }) => {
   const [serverUrl, setServerUrl] = useState('http://');
-  const [userName, setUserName] = useState('');
   const [loading, setLoading] = useState(false);
-  const login = useAuthStore((s) => s.login);
+  const setServerUrlStore = useAuthStore((s) => s.setServerUrl);
 
-  const handleConnect = async () => {
+  const handleContinue = async () => {
     const cleanUrl = serverUrl.replace(/\/+$/, '').trim();
     if (!cleanUrl || cleanUrl === 'http://' || cleanUrl === 'https://') {
       Alert.alert('Missing URL', 'Please enter your server address.');
       return;
     }
-    if (!userName.trim()) {
-      Alert.alert('Missing Name', 'Please enter your name.');
-      return;
-    }
-
     setLoading(true);
     const ok = await api.testConnectivity(cleanUrl);
     setLoading(false);
-
     if (!ok) {
       Alert.alert(
         'Cannot Connect',
-        `Could not reach the server at:\n${cleanUrl}\n\nMake sure:\n• Your iPhone and computer are on the same Wi-Fi\n• The backend is running\n• The IP address and port are correct`
+        `Could not reach:\n${cleanUrl}\n\nMake sure:\n• Phone and computer are on the same Wi-Fi\n• The backend is running\n• The IP and port are correct`
       );
       return;
     }
-
-    await login(cleanUrl, userName.trim());
+    await setServerUrlStore(cleanUrl);
+    navigation.replace('Login');
   };
 
   return (
@@ -55,43 +42,28 @@ export const SetupScreen: React.FC<SetupScreenProps> = () => {
           <View style={styles.hero}>
             <Text style={styles.emoji}>🏋️</Text>
             <Text style={styles.title}>AI Fitness Coach</Text>
-            <Text style={styles.subtitle}>Analyze your exercise form with AI</Text>
+            <Text style={styles.subtitle}>Connect to your backend server</Text>
           </View>
 
           <View style={styles.form}>
-            <Text style={styles.sectionTitle}>Connect to Your Server</Text>
             <Text style={styles.hint}>
-              Run{' '}
-              <Text style={styles.code}>ipconfig</Text>
-              {' '}on Windows to find your computer's local IP, then enter it below.
+              Run <Text style={styles.code}>ipconfig</Text> on Windows to find your
+              computer's local IP, then enter it below.
             </Text>
-
             <Text style={styles.label}>Server URL</Text>
             <TextInput
               style={styles.input}
               value={serverUrl}
               onChangeText={setServerUrl}
-              placeholder="http://192.168.1.x:80"
+              placeholder="http://192.168.1.x:8000"
               placeholderTextColor={COLORS.textMuted}
               autoCapitalize="none"
               autoCorrect={false}
               keyboardType="url"
-              returnKeyType="next"
-            />
-
-            <Text style={styles.label}>Your Name</Text>
-            <TextInput
-              style={styles.input}
-              value={userName}
-              onChangeText={setUserName}
-              placeholder="Alex"
-              placeholderTextColor={COLORS.textMuted}
-              autoCorrect={false}
               returnKeyType="done"
-              onSubmitEditing={handleConnect}
+              onSubmitEditing={handleContinue}
             />
-
-            <Button label="Connect" onPress={handleConnect} loading={loading} style={styles.button} />
+            <Button label="Continue" onPress={handleContinue} loading={loading} style={styles.btn} />
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -108,10 +80,9 @@ const styles = StyleSheet.create({
   title: { color: COLORS.text, fontSize: FONT_SIZE.xxl, fontWeight: '700', marginBottom: SPACING.xs },
   subtitle: { color: COLORS.textSecondary, fontSize: FONT_SIZE.md },
   form: { gap: SPACING.sm },
-  sectionTitle: { color: COLORS.text, fontSize: FONT_SIZE.lg, fontWeight: '600', marginBottom: SPACING.xs },
-  hint: { color: COLORS.textSecondary, fontSize: FONT_SIZE.sm, lineHeight: 20, marginBottom: SPACING.sm },
+  hint: { color: COLORS.textSecondary, fontSize: FONT_SIZE.sm, lineHeight: 20 },
   code: { color: COLORS.primary, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' },
-  label: { color: COLORS.textSecondary, fontSize: FONT_SIZE.sm, marginTop: SPACING.xs, marginBottom: 4 },
+  label: { color: COLORS.textSecondary, fontSize: FONT_SIZE.sm, marginTop: SPACING.sm },
   input: {
     backgroundColor: COLORS.surface,
     borderWidth: 1,
@@ -122,5 +93,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
     paddingVertical: 14,
   },
-  button: { marginTop: SPACING.md },
+  btn: { marginTop: SPACING.md },
 });

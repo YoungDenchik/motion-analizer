@@ -9,18 +9,22 @@ import { RecordReferenceScreen } from '../screens/exercises/RecordReferenceScree
 import { AnalyzeScreen } from '../screens/analyze/AnalyzeScreen';
 import { JobPollingScreen } from '../screens/analyze/JobPollingScreen';
 import { ResultScreen } from '../screens/analyze/ResultScreen';
+import { HistoryScreen } from '../screens/history/HistoryScreen';
+import { HistoryDetailScreen } from '../screens/history/HistoryDetailScreen';
 import { SettingsScreen } from '../screens/settings/SettingsScreen';
 
 import type {
   MainTabParamList,
   ExercisesStackParamList,
   AnalyzeStackParamList,
+  HistoryStackParamList,
 } from '../types/navigation';
 import { COLORS, FONT_SIZE, SPACING } from '../constants';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 const ExercisesStack = createNativeStackNavigator<ExercisesStackParamList>();
 const AnalyzeStack = createNativeStackNavigator<AnalyzeStackParamList>();
+const HistoryStack = createNativeStackNavigator<HistoryStackParamList>();
 
 const stackScreenOptions = {
   headerStyle: { backgroundColor: COLORS.surface },
@@ -32,43 +36,37 @@ const stackScreenOptions = {
 
 const ExercisesNavigator: React.FC = () => (
   <ExercisesStack.Navigator screenOptions={stackScreenOptions}>
-    <ExercisesStack.Screen
-      name="ExercisesList"
-      component={ExercisesScreen}
-      options={{ title: 'Exercises' }}
-    />
-    <ExercisesStack.Screen
-      name="RecordReference"
-      component={RecordReferenceScreen}
-      options={{ title: 'Record Reference' }}
-    />
+    <ExercisesStack.Screen name="ExercisesList" component={ExercisesScreen} options={{ title: 'Exercises' }} />
+    <ExercisesStack.Screen name="RecordReference" component={RecordReferenceScreen} options={{ title: 'Record Reference' }} />
   </ExercisesStack.Navigator>
 );
 
 const AnalyzeNavigator: React.FC = () => (
   <AnalyzeStack.Navigator screenOptions={stackScreenOptions}>
-    <AnalyzeStack.Screen
-      name="AnalyzeSelect"
-      component={AnalyzeScreen}
-      options={{ title: 'Analyze' }}
-    />
-    <AnalyzeStack.Screen
-      name="JobPolling"
-      component={JobPollingScreen}
-      options={{ title: 'Processing…', headerBackVisible: false }}
-    />
-    <AnalyzeStack.Screen
-      name="Result"
-      component={ResultScreen}
-      options={{ title: 'Your Results' }}
-    />
+    <AnalyzeStack.Screen name="AnalyzeSelect" component={AnalyzeScreen} options={{ title: 'Analyze' }} />
+    <AnalyzeStack.Screen name="JobPolling" component={JobPollingScreen} options={{ title: 'Processing…', headerBackVisible: false }} />
+    <AnalyzeStack.Screen name="Result" component={ResultScreen} options={{ title: 'Your Results' }} />
   </AnalyzeStack.Navigator>
+);
+
+const HistoryNavigator: React.FC = () => (
+  <HistoryStack.Navigator screenOptions={stackScreenOptions}>
+    <HistoryStack.Screen name="HistoryList" component={HistoryScreen} options={{ title: 'History' }} />
+    <HistoryStack.Screen
+      name="HistoryDetail"
+      component={HistoryDetailScreen}
+      options={({ route }) => ({
+        title: route.params.entry.exercise.charAt(0).toUpperCase() + route.params.entry.exercise.slice(1),
+      })}
+    />
+  </HistoryStack.Navigator>
 );
 
 const TAB_ICONS: Record<string, [string, string]> = {
   Home: ['home', 'home-outline'],
   Exercises: ['barbell', 'barbell-outline'],
   Analyze: ['analytics', 'analytics-outline'],
+  History: ['time', 'time-outline'],
   Settings: ['settings', 'settings-outline'],
 };
 
@@ -77,9 +75,7 @@ export const MainNavigator: React.FC = () => (
     screenOptions={({ route }) => ({
       tabBarIcon: ({ focused, color, size }) => {
         const [active, inactive] = TAB_ICONS[route.name] ?? ['ellipse', 'ellipse-outline'];
-        return (
-          <Ionicons name={(focused ? active : inactive) as any} size={size} color={color} />
-        );
+        return <Ionicons name={(focused ? active : inactive) as any} size={size} color={color} />;
       },
       tabBarActiveTintColor: COLORS.primary,
       tabBarInactiveTintColor: COLORS.textMuted,
@@ -97,6 +93,7 @@ export const MainNavigator: React.FC = () => (
     <Tab.Screen name="Home" component={HomeScreen} />
     <Tab.Screen name="Exercises" component={ExercisesNavigator} />
     <Tab.Screen name="Analyze" component={AnalyzeNavigator} />
+    <Tab.Screen name="History" component={HistoryNavigator} />
     <Tab.Screen name="Settings" component={SettingsScreen} />
   </Tab.Navigator>
 );

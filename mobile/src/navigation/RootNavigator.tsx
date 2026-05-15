@@ -12,7 +12,7 @@ import type { RootStackParamList } from '../types/navigation';
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export const RootNavigator: React.FC = () => {
-  const { isAuthenticated, isLoading, initialize } = useAuthStore();
+  const { isLoading, token, initialize } = useAuthStore();
 
   useEffect(() => {
     initialize();
@@ -29,7 +29,7 @@ export const RootNavigator: React.FC = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false, animation: 'fade' }}>
-        {isAuthenticated ? (
+        {token ? (
           <Stack.Screen name="Main" component={MainNavigator} />
         ) : (
           <Stack.Screen name="Auth" component={AuthNavigator} />

@@ -5,6 +5,7 @@ import { COLORS, SPACING, FONT_SIZE } from '../../constants';
 import { ErrorMessage } from '../../components/common/ErrorMessage';
 import { Button } from '../../components/common/Button';
 import { useJobPoller } from '../../hooks/useJobPoller';
+import { saveToHistory } from '../../services/historyStorage';
 import type { JobPollingScreenProps } from '../../types/navigation';
 
 const PROGRESS_MESSAGES = [
@@ -24,6 +25,7 @@ export const JobPollingScreen: React.FC<JobPollingScreenProps> = ({ navigation, 
 
   useEffect(() => {
     if (status === 'done' && result) {
+      saveToHistory(exercise, result);
       navigation.replace('Result', { result, jobId });
     }
   }, [status, result]);

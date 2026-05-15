@@ -1,3 +1,27 @@
+export interface User {
+  id: number;
+  username: string;
+  email: string;
+  created_at: string;
+}
+
+export interface AuthResponse {
+  user: User;
+  access_token: string;
+  token_type: string;
+}
+
+export interface RegisterRequest {
+  username: string;
+  email: string;
+  password: string;
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
 export interface FeedbackItem {
   cue: string;
   explanation: string;
@@ -73,4 +97,11 @@ export interface AnalyzeResponse {
 
 export interface DeleteResponse {
   success: boolean;
+}
+
+export interface HistoryEntry {
+  id: string;
+  exercise: string;
+  date: string;
+  result: AnalysisResult;
 }

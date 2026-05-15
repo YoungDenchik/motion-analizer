@@ -1,5 +1,8 @@
 import { apiClient, uploadClient } from './client';
 import type {
+  AuthResponse,
+  LoginRequest,
+  RegisterRequest,
   ReferencesListResponse,
   RecordResponse,
   AnalyzeResponse,
@@ -7,6 +10,7 @@ import type {
   JobResponse,
   AnalysisResult,
   ReferenceResult,
+  User,
 } from '../types/api';
 
 function makeVideoFormData(
@@ -21,6 +25,21 @@ function makeVideoFormData(
 }
 
 export const api = {
+  auth: {
+    async register(req: RegisterRequest): Promise<AuthResponse> {
+      const { data } = await apiClient.post<AuthResponse>('/auth/register', req);
+      return data;
+    },
+    async login(req: LoginRequest): Promise<AuthResponse> {
+      const { data } = await apiClient.post<AuthResponse>('/auth/login', req);
+      return data;
+    },
+    async me(): Promise<User> {
+      const { data } = await apiClient.get<User>('/auth/me');
+      return data;
+    },
+  },
+
   references: {
     async list(): Promise<ReferencesListResponse> {
       const { data } = await apiClient.get<ReferencesListResponse>('/references');
@@ -89,10 +108,12 @@ export const api = {
 
   async testConnectivity(serverUrl: string): Promise<boolean> {
     try {
-      await apiClient.get('/references', { baseURL: `${serverUrl}/api` });
+      await apiClient.get('/auth/me', { baseURL: `${serverUrl}/api` });
       return true;
-    } catch {
-      return false;
+    } catch (e: any) {
+      // 401 means the server is reachable (auth required) — that's fine
+      return e?.message?.includes('401') || e?.response?.status === 401
+        || String(e).includes('Invalid or expired');
     }
   },
 };

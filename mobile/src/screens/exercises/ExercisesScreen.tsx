@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { COLORS, SPACING, FONT_SIZE, BORDER_RADIUS } from '../../constants';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { ErrorMessage } from '../../components/common/ErrorMessage';
@@ -20,9 +20,7 @@ export const ExercisesScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const { exercises, loading, error, fetch, deleteExercise } = useExercises();
 
-  useEffect(() => {
-    fetch();
-  }, []);
+  useFocusEffect(useCallback(() => { fetch(); }, [fetch]));
 
   const handleDelete = useCallback(
     (name: string) => {

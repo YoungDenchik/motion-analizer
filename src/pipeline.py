@@ -130,6 +130,7 @@ class AnalysisPipeline:
         video_path: str,
         description: str = "",
         overwrite: bool = False,
+        store: Optional[ReferenceStore] = None,
     ) -> ReferenceSequence:
         """
         Extract features from a video and save as reference for an exercise.
@@ -150,19 +151,21 @@ class AnalysisPipeline:
         print(f"[Pipeline] Detected {len(ref_seg.reps)} rep(s) in reference "
               f"(indicator: {ref_seg.indicator_feature})")
 
-        path = self.store.save(
+        effective_store = store or self.store
+        path = effective_store.save(
             name=exercise_name,
             time_series=time_series,
             description=description,
             overwrite=overwrite,
         )
         print(f"[Pipeline] Reference saved: {path} ({time_series.num_frames} frames)")
-        return self.store.load(exercise_name)
+        return effective_store.load(exercise_name)
 
     def analyze_video(
         self,
         video_path: str,
         exercise_name: str,
+        store: Optional[ReferenceStore] = None,
     ) -> AnalysisResult:
         """
         Analyze a user's exercise video against a stored reference.
@@ -186,7 +189,8 @@ class AnalysisPipeline:
 
         # Auto-select the best-matching reference variant (handles multiple
         # references per exercise at different angles / technique styles).
-        reference = self.store.find_best_match(user_ts, exercise_name)
+        effective_store = store or self.store
+        reference = effective_store.find_best_match(user_ts, exercise_name)
         print(f"[Pipeline] Using reference: '{reference.name}' "
               f"({reference.time_series.num_frames} frames)")
 

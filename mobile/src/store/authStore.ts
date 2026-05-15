@@ -1,59 +1,51 @@
 import { create } from 'zustand';
 import { storage } from '../services/storage';
+import type { User } from '../types/api';
 
 interface AuthState {
-  isAuthenticated: boolean;
-  serverUrl: string;
-  userName: string;
   isLoading: boolean;
+  serverUrl: string;
+  token: string | null;
+  user: User | null;
+
   initialize: () => Promise<void>;
-  login: (serverUrl: string, userName: string) => Promise<void>;
+  setServerUrl: (url: string) => Promise<void>;
+  loginSuccess: (token: string, user: User) => Promise<void>;
   logout: () => Promise<void>;
-  updateServerUrl: (url: string) => Promise<void>;
-  updateUserName: (name: string) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
-  isAuthenticated: false,
-  serverUrl: '',
-  userName: '',
   isLoading: true,
+  serverUrl: '',
+  token: null,
+  user: null,
 
   initialize: async () => {
-    const [authenticated, serverUrl, userName] = await Promise.all([
-      storage.isAuthenticated(),
+    const [serverUrl, token, user] = await Promise.all([
       storage.getServerUrl(),
-      storage.getUserName(),
+      storage.getToken(),
+      storage.getUser<User>(),
     ]);
     set({
-      isAuthenticated: authenticated,
       serverUrl: serverUrl ?? '',
-      userName: userName ?? '',
+      token,
+      user,
       isLoading: false,
     });
   },
 
-  login: async (serverUrl, userName) => {
-    await Promise.all([
-      storage.saveServerUrl(serverUrl),
-      storage.saveUserName(userName),
-      storage.setAuthenticated(true),
-    ]);
-    set({ isAuthenticated: true, serverUrl, userName });
-  },
-
-  logout: async () => {
-    await storage.clearAll();
-    set({ isAuthenticated: false, serverUrl: '', userName: '' });
-  },
-
-  updateServerUrl: async (url) => {
+  setServerUrl: async (url) => {
     await storage.saveServerUrl(url);
     set({ serverUrl: url });
   },
 
-  updateUserName: async (name) => {
-    await storage.saveUserName(name);
-    set({ userName: name });
+  loginSuccess: async (token, user) => {
+    await Promise.all([storage.saveToken(token), storage.saveUser(user)]);
+    set({ token, user });
+  },
+
+  logout: async () => {
+    await storage.clearAuth();
+    set({ token: null, user: null });
   },
 }));

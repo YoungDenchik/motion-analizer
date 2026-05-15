@@ -3,19 +3,15 @@ import { ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS, SPACING } from '../../constants';
 import { ResultDetail } from '../../components/exercise/ResultDetail';
-import { useAuthStore } from '../../store/authStore';
-import { getVideoUrl } from '../../api/endpoints';
-import type { ResultScreenProps } from '../../types/navigation';
+import type { HistoryDetailScreenProps } from '../../types/navigation';
 
-export const ResultScreen: React.FC<ResultScreenProps> = ({ route }) => {
-  const { result, jobId } = route.params;
-  const serverUrl = useAuthStore((s) => s.serverUrl);
-  const videoUrl = result.has_annotated_video && jobId ? getVideoUrl(serverUrl, jobId) : null;
+export const HistoryDetailScreen: React.FC<HistoryDetailScreenProps> = ({ route }) => {
+  const { entry } = route.params;
 
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        <ResultDetail result={result} videoUrl={videoUrl} />
+        <ResultDetail result={entry.result} videoUrl={null} />
       </ScrollView>
     </SafeAreaView>
   );

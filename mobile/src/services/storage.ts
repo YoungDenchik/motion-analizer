@@ -2,34 +2,35 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const KEYS = {
   SERVER_URL: '@ai_trainer:server_url',
-  USER_NAME: '@ai_trainer:user_name',
-  IS_AUTHENTICATED: '@ai_trainer:is_authenticated',
+  TOKEN: '@ai_trainer:token',
+  USER: '@ai_trainer:user',
 } as const;
 
 export const storage = {
   async saveServerUrl(url: string): Promise<void> {
     await AsyncStorage.setItem(KEYS.SERVER_URL, url);
   },
-
   async getServerUrl(): Promise<string | null> {
     return AsyncStorage.getItem(KEYS.SERVER_URL);
   },
 
-  async saveUserName(name: string): Promise<void> {
-    await AsyncStorage.setItem(KEYS.USER_NAME, name);
+  async saveToken(token: string): Promise<void> {
+    await AsyncStorage.setItem(KEYS.TOKEN, token);
+  },
+  async getToken(): Promise<string | null> {
+    return AsyncStorage.getItem(KEYS.TOKEN);
   },
 
-  async getUserName(): Promise<string | null> {
-    return AsyncStorage.getItem(KEYS.USER_NAME);
+  async saveUser(user: object): Promise<void> {
+    await AsyncStorage.setItem(KEYS.USER, JSON.stringify(user));
+  },
+  async getUser<T>(): Promise<T | null> {
+    const raw = await AsyncStorage.getItem(KEYS.USER);
+    return raw ? (JSON.parse(raw) as T) : null;
   },
 
-  async setAuthenticated(value: boolean): Promise<void> {
-    await AsyncStorage.setItem(KEYS.IS_AUTHENTICATED, String(value));
-  },
-
-  async isAuthenticated(): Promise<boolean> {
-    const val = await AsyncStorage.getItem(KEYS.IS_AUTHENTICATED);
-    return val === 'true';
+  async clearAuth(): Promise<void> {
+    await AsyncStorage.multiRemove([KEYS.TOKEN, KEYS.USER]);
   },
 
   async clearAll(): Promise<void> {

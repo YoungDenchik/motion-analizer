@@ -27,6 +27,7 @@ export const RecordReferenceScreen: React.FC<RecordReferenceScreenProps> = ({ na
   const [videoName, setVideoName] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const pickVideo = async () => {
@@ -61,23 +62,35 @@ export const RecordReferenceScreen: React.FC<RecordReferenceScreenProps> = ({ na
     setUploadProgress(0);
 
     try {
-      await api.references.record(
+      const { job_id } = await api.references.record(
         name.trim().toLowerCase(),
         videoUri,
         videoName,
         description.trim() || undefined,
         overwrite,
-        setUploadProgress
+        setUploadProgress,
       );
-      Alert.alert(
-        'Upload Complete',
-        'Your reference video is being processed. This may take a minute.',
-        [{ text: 'OK', onPress: () => navigation.goBack() }]
-      );
+      setUploading(false);
+      setProcessing(true);
+
+      // Poll until the backend finishes processing the reference
+      const MAX_ATTEMPTS = 150;
+      for (let i = 0; i < MAX_ATTEMPTS; i++) {
+        await new Promise((r) => setTimeout(r, 2000));
+        const status = await api.analysis.getReferenceStatus(job_id);
+        if (status.status === 'done') {
+          navigation.goBack();
+          return;
+        }
+        if (status.status === 'error') {
+          throw new Error(status.error ?? 'Processing failed.');
+        }
+      }
+      throw new Error('Processing timed out. Try a shorter video.');
     } catch (err) {
       setError((err as Error).message);
-    } finally {
       setUploading(false);
+      setProcessing(false);
     }
   };
 
@@ -138,11 +151,17 @@ export const RecordReferenceScreen: React.FC<RecordReferenceScreenProps> = ({ na
             </Card>
           )}
 
+          {processing && (
+            <Card style={styles.progressCard}>
+              <Text style={styles.progressText}>Processing reference video… this may take a minute.</Text>
+            </Card>
+          )}
+
           <Button
-            label="Upload & Record"
+            label={processing ? 'Processing…' : 'Upload & Record'}
             onPress={handleSubmit}
-            loading={uploading}
-            disabled={!name.trim() || !videoUri}
+            loading={uploading || processing}
+            disabled={!name.trim() || !videoUri || uploading || processing}
             style={styles.submitBtn}
           />
         </ScrollView>

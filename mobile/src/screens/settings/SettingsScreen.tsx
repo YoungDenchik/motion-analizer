@@ -7,29 +7,26 @@ import { Button } from '../../components/common/Button';
 import { useAuthStore } from '../../store/authStore';
 
 export const SettingsScreen: React.FC = () => {
-  const { serverUrl, userName, updateServerUrl, updateUserName, logout } = useAuthStore();
+  const { serverUrl, user, setServerUrl, logout } = useAuthStore();
   const [urlDraft, setUrlDraft] = useState(serverUrl);
-  const [nameDraft, setNameDraft] = useState(userName);
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
-    if (!urlDraft.trim() || !nameDraft.trim()) {
-      Alert.alert('Missing Fields', 'Both server URL and name are required.');
+    const clean = urlDraft.replace(/\/+$/, '').trim();
+    if (!clean) {
+      Alert.alert('Missing URL', 'Server URL is required.');
       return;
     }
     setSaving(true);
-    await Promise.all([
-      updateServerUrl(urlDraft.replace(/\/+$/, '').trim()),
-      updateUserName(nameDraft.trim()),
-    ]);
+    await setServerUrl(clean);
     setSaving(false);
-    Alert.alert('Saved', 'Settings updated successfully.');
+    Alert.alert('Saved', 'Server URL updated.');
   };
 
   const handleLogout = () => {
-    Alert.alert('Disconnect', 'This will clear your saved server and profile. Continue?', [
+    Alert.alert('Sign Out', 'You will be signed out of your account.', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Disconnect', style: 'destructive', onPress: logout },
+      { text: 'Sign Out', style: 'destructive', onPress: logout },
     ]);
   };
 
@@ -37,30 +34,31 @@ export const SettingsScreen: React.FC = () => {
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.scroll}>
         <Card>
-          <Text style={styles.cardTitle}>Connection</Text>
+          <Text style={styles.cardTitle}>Account</Text>
+          <View style={styles.row}>
+            <Text style={styles.label}>Username</Text>
+            <Text style={styles.value}>{user?.username ?? '—'}</Text>
+          </View>
+          <View style={styles.row}>
+            <Text style={styles.label}>Email</Text>
+            <Text style={styles.value}>{user?.email ?? '—'}</Text>
+          </View>
+        </Card>
 
+        <Card>
+          <Text style={styles.cardTitle}>Connection</Text>
           <Text style={styles.label}>Server URL</Text>
           <TextInput
             style={styles.input}
             value={urlDraft}
             onChangeText={setUrlDraft}
-            placeholder="http://192.168.1.x:80"
+            placeholder="http://192.168.1.x:8000"
             placeholderTextColor={COLORS.textMuted}
             autoCapitalize="none"
             autoCorrect={false}
             keyboardType="url"
           />
-
-          <Text style={styles.label}>Your Name</Text>
-          <TextInput
-            style={styles.input}
-            value={nameDraft}
-            onChangeText={setNameDraft}
-            placeholder="Your name"
-            placeholderTextColor={COLORS.textMuted}
-          />
-
-          <Button label="Save Changes" onPress={handleSave} loading={saving} />
+          <Button label="Save URL" onPress={handleSave} loading={saving} />
         </Card>
 
         <Card style={styles.aboutCard}>
@@ -70,7 +68,7 @@ export const SettingsScreen: React.FC = () => {
           <Text style={styles.aboutLine}>Built with Expo + React Native</Text>
         </Card>
 
-        <Button label="Disconnect" onPress={handleLogout} variant="danger" />
+        <Button label="Sign Out" onPress={handleLogout} variant="danger" />
       </ScrollView>
     </SafeAreaView>
   );
@@ -80,7 +78,9 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: COLORS.background },
   scroll: { padding: SPACING.lg, gap: SPACING.md },
   cardTitle: { color: COLORS.text, fontSize: FONT_SIZE.md, fontWeight: '700', marginBottom: SPACING.md },
-  label: { color: COLORS.textSecondary, fontSize: FONT_SIZE.sm, marginBottom: 4 },
+  row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: SPACING.sm },
+  label: { color: COLORS.textSecondary, fontSize: FONT_SIZE.sm },
+  value: { color: COLORS.text, fontSize: FONT_SIZE.sm, fontWeight: '500' },
   input: {
     backgroundColor: COLORS.surfaceLight,
     borderWidth: 1,
@@ -91,6 +91,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
     paddingVertical: 14,
     marginBottom: SPACING.md,
+    marginTop: 4,
   },
   aboutCard: {},
   aboutLine: { color: COLORS.textSecondary, fontSize: FONT_SIZE.sm, marginBottom: 4 },
